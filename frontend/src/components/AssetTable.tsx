@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { Asset } from '../types'
 import './AssetTable.css'
 
@@ -8,6 +9,20 @@ interface AssetTableProps {
 }
 
 export function AssetTable({ assets, isConnected, connectionType }: AssetTableProps) {
+  // Store the previous asset list to compare changes
+  const previousAssetsRef = useRef<Asset[]>([])
+  
+  // Track which asset rows should be highlighted
+  const [highlightedRows, setHighlightedRows] = useState<string[]>([])
+
+  // Track reconnecting state 
+  const [isReconnecting, setIsReconnecting] = useState(false)
+
+  // Track filter and sort options
+  const [filterType, setFilterType] = useState<'all' | 'glb' | 'gltf'>('all')
+  const [sortOption, setSortOption] = useState<'name' | 'date'>('date')
+
+  // Format the date string for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleString('en-US', {
@@ -20,20 +35,116 @@ export function AssetTable({ assets, isConnected, connectionType }: AssetTablePr
     })
   }
 
+  // Return a CSS class based on asset type
   const getTypeBadgeClass = (type: string) => {
     return type === 'glb' ? 'badge-glb' : 'badge-gltf'
   }
 
+  // Detect changes in asset data and highlight updated rows
+  useEffect(() => {
+    const changedIds: string[] = []
+
+    // Compare current assets with previous ones
+    assets.forEach((asset) => {
+      const previous = previousAssetsRef.current.find((a) => a.id === asset.id)
+      if (previous && JSON.stringify(previous) !== JSON.stringify(asset)) {
+        changedIds.push(asset.id)
+      }
+    })
+
+    // If changes are detected, highlight the affected rows
+    if (changedIds.length > 0) {
+      setHighlightedRows(changedIds)
+
+      // Remove highlight after 3 seconds
+      const timeout = setTimeout(() => {
+        setHighlightedRows([])
+      }, 3000)
+
+      // Cleanup timeout if assets change again before 3 seconds
+      return () => clearTimeout(timeout)
+    }
+
+    // Update the reference with the latest asset list
+    previousAssetsRef.current = assets
+  }, [assets])
+
+  // Detect reconnecting state (Task 3)
+  useEffect(() => {
+    if (!isConnected) {
+      setIsReconnecting(true)
+      // After 5 seconds, assume still disconnected → show "Disconnected"
+      const timeout = setTimeout(() => setIsReconnecting(false), 5000)
+      return () => clearTimeout(timeout)
+    } else {
+      setIsReconnecting(false)
+    }
+  }, [isConnected])
+
+  // Apply filtering and sorting
+  const displayedAssets = useMemo(() => {
+    let filtered = assets
+
+    // Filter by type
+    if (filterType !== 'all') {
+      filtered = filtered.filter(asset => asset.type.toLowerCase() === filterType)
+    }
+
+    // Sort by name or date
+    if (sortOption === 'name') {
+      filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name))
+    } else if (sortOption === 'date') {
+      filtered = [...filtered].sort(
+        (a, b) => new Date(b.last_modified).getTime() - new Date(a.last_modified).getTime()
+      )
+    }
+
+    return filtered
+  }, [assets, filterType, sortOption])
+
   return (
     <div className="asset-table-container">
+      {/* Connection status */}
       <div className="connection-status">
-        <div className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}>
+        <div className={`status-indicator ${
+            isConnected ? 'connected' : isReconnecting ? 'reconnecting' : 'disconnected' }`}>
           <span className="status-dot"></span>
-          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+          <span>
+            {isConnected
+              ? 'Connected'
+              : isReconnecting
+              ? 'Reconnecting...'
+              : 'Disconnected'}
+          </span>
           <span className="connection-type">({connectionType.toUpperCase()})</span>
         </div>
       </div>
-      
+      {/* Filters and sorting */}
+      <div className="filters">
+        <label>
+          Filter by type:
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'glb' | 'gltf')}
+          >
+            <option value="all">All</option>
+            <option value="glb">GLB</option>
+            <option value="gltf">GLTF</option>
+          </select>
+        </label>
+
+        <label>
+          Sort by:
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value as 'name' | 'date')}
+          >
+            <option value="date">Last Modified</option>
+            <option value="name">Name</option>
+          </select>
+        </label>
+      </div>
+      {/* Asset table */}
       <div className="table-wrapper">
         <table className="asset-table">
           <thead>
@@ -45,15 +156,19 @@ export function AssetTable({ assets, isConnected, connectionType }: AssetTablePr
             </tr>
           </thead>
           <tbody>
-            {assets.length === 0 ? (
+            {displayedAssets.length === 0 ? (
               <tr>
                 <td colSpan={4} className="empty-state">
-                  Loading assets...
+                  No assets found...
                 </td>
               </tr>
             ) : (
-              assets.map((asset) => (
-                <tr key={asset.id} className="asset-row">
+              displayedAssets.map((asset) => (
+                <tr 
+                    key={asset.id} 
+                    // Apply highlight class if asset was recently updated
+                    className={`asset-row ${highlightedRows.includes(asset.id) ? 'highlighted' : ''}`}
+                >
                   <td className="asset-id">{asset.id.substring(0, 8)}...</td>
                   <td className="asset-name">{asset.name}</td>
                   <td>
@@ -68,7 +183,7 @@ export function AssetTable({ assets, isConnected, connectionType }: AssetTablePr
           </tbody>
         </table>
       </div>
-      
+      {/* Footer */}
       <div className="table-footer">
         <p>Total Assets: {assets.length}</p>
         <p className="update-info">
@@ -78,4 +193,3 @@ export function AssetTable({ assets, isConnected, connectionType }: AssetTablePr
     </div>
   )
 }
-

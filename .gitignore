@@ -1,0 +1,15 @@
+# === Python backend ===
+# Ignore Python cache and virtual environment
+backend/__pycache__/
+backend/venv/
+*.pyc
+
+# === Node.js frontend ===
+# Ignore dependencies and temporary folders
+frontend/node_modules/
+frontend/tmp/
+frontend/.tanstack/
+
+# === Logs and temporary files ===
+*.log
+*.tmp

@@ -30,6 +30,8 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
+
+/* Connection status styles */
 .status-indicator.connected .status-dot {
   background: #10b981;
   box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
@@ -38,6 +40,34 @@
 .status-indicator.disconnected .status-dot {
   background: #ef4444;
   box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+}
+
+/* Text color for reconnecting and disconnected states */
+.status-indicator.reconnecting {
+  color: #f59e0b; /* amber text for reconnecting state */
+}
+
+.status-indicator.disconnected {
+  color: #ef4444; /* red text for disconnected state */
+}
+
+/* Filters section styles */
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filters label {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.filters select {
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
 }
 
 @keyframes pulse {
@@ -94,6 +124,22 @@
 
 .asset-table tbody tr.asset-row {
   animation: fadeIn 0.3s ease-in;
+}
+
+/* Highlight effect for updated rows */
+.highlighted {
+  background-color: #fff3b0; /* soft yellow highlight */
+  transition: background-color 0.5s ease-in-out;
+}
+
+/* fade animation for smoother disappearance */
+@keyframes fadeHighlight {
+  0% { background-color: #fff3b0; }
+  100% { background-color: transparent; }
+}
+
+.highlighted {
+  animation: fadeHighlight 3s ease forwards;
 }
 
 @keyframes fadeIn {
@@ -169,6 +215,18 @@
   font-style: italic;
 }
 
+
+.row-highlight {
+  background-color: #ffc10740; /* Light, semi-transparent amber color */
+  /* Transition to make the highlight appear instantly */
+  transition: background-color 0.1s ease-in-out; 
+}
+
+.asset-table tbody tr {
+    /* Assure une transition douce */
+    transition: background-color 0.5s ease-out;
+}
+
 @media (max-width: 768px) {
   .asset-table-container {
     padding: 16px;
@@ -188,5 +246,6 @@
     gap: 8px;
     align-items: flex-start;
   }
+  
 }
 

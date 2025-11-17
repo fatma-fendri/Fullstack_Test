@@ -137,17 +137,6 @@ async def get_assets():
     """Get all assets."""
     return list(assets.values())
 
-
-@app.get("/api/assets/{asset_id}", response_model=Asset)
-async def get_asset(asset_id: str):
-    """Get a specific asset by ID."""
-    if asset_id not in assets:
-        from fastapi import HTTPException
-
-        raise HTTPException(status_code=404, detail="Asset not found")
-    return assets[asset_id]
-
-
 @app.get("/api/assets/stream")
 async def stream_assets():
     """Server-Sent Events endpoint for real-time asset updates."""
@@ -173,6 +162,16 @@ async def stream_assets():
             "X-Accel-Buffering": "no",
         },
     )
+
+
+@app.get("/api/assets/{asset_id}", response_model=Asset)
+async def get_asset(asset_id: str):
+    """Get a specific asset by ID."""
+    if asset_id not in assets:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail="Asset not found")
+    return assets[asset_id]
 
 
 @app.websocket("/ws")

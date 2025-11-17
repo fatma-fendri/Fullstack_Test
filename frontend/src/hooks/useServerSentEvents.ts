@@ -7,7 +7,7 @@ export function useServerSentEvents() {
   const eventSourceRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
-    const eventSource = new EventSource('/api/assets/stream')
+    const eventSource = new EventSource('http://localhost:8000/api/assets/stream')
     eventSourceRef.current = eventSource
     
     eventSource.onopen = () => {
@@ -25,9 +25,9 @@ export function useServerSentEvents() {
     }
 
     eventSource.onerror = (error) => {
-      console.error('SSE error:', error)
+      console.error('SSE error:', error) // log errors clearly
       setIsConnected(false)
-      // EventSource will automatically attempt to reconnect
+      // Browser will auto-reconnect
     }
 
     return () => {
@@ -41,4 +41,3 @@ export function useServerSentEvents() {
 
   return { assets, isConnected }
 }
-

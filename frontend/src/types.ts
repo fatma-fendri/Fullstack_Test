@@ -4,4 +4,3 @@ export interface Asset {
   type: 'glb' | 'gltf'
   last_modified: string
 }
-

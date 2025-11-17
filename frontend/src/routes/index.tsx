@@ -3,9 +3,8 @@ import { AssetTable } from '../components/AssetTable'
 import { useQuery } from '@tanstack/react-query'
 import { assetApi } from '../api/assetApi'
 import { useState } from 'react'
-import { useWebSocket } from '../hooks/useWebSocket'
-import { useServerSentEvents } from '../hooks/useServerSentEvents'
 import './index.css'
+import { ConnectionData } from '../components/ConnectionData'
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -21,19 +20,6 @@ function Index() {
     refetchInterval: false, // We'll use real-time updates instead
   })
 
-  // Conditionally use WebSocket or SSE based on connectionType
-  // Note: In a production app, you'd want to conditionally render/use hooks
-  // For this test, both hooks run but we only use the active one
-  const { assets: wsAssets, isConnected: wsConnected } = useWebSocket()
-  const { assets: sseAssets, isConnected: sseConnected } = useServerSentEvents()
-
-  // Use the appropriate data source based on connection type
-  const assets = connectionType === 'websocket' ? wsAssets : sseAssets
-  const isConnected = connectionType === 'websocket' ? wsConnected : sseConnected
-
-  // Fallback to initial query data if real-time data is not available yet
-  const displayAssets = assets.length > 0 ? assets : initialAssets
-
   return (
     <div className="index-container">
       <div className="controls">
@@ -41,13 +27,19 @@ function Index() {
         <div className="connection-buttons">
           <button
             className={`connection-btn ${connectionType === 'websocket' ? 'active' : ''}`}
-            onClick={() => setConnectionType('websocket')}
+            onClick={() => {
+            console.log('🔌 Switching to WebSocket')
+            setConnectionType('websocket')
+            }}
           >
             WebSocket
           </button>
           <button
             className={`connection-btn ${connectionType === 'sse' ? 'active' : ''}`}
-            onClick={() => setConnectionType('sse')}
+            onClick={() => {
+            console.log('🔌 Switching to SSE')
+            setConnectionType('sse')
+            }}
           >
             Server-Sent Events (SSE)
           </button>
@@ -59,11 +51,20 @@ function Index() {
         </p>
       </div>
 
-      <AssetTable
-        assets={displayAssets}
-        isConnected={isConnected}
-        connectionType={connectionType}
-      />
+      {/* key forces remounting when changing types => the previous hook cleans up */}
+      <ConnectionData key={connectionType} connectionType={connectionType}>
+        {({ assets, isConnected }) => {
+          const displayAssets = assets.length > 0 ? assets : initialAssets
+          return (
+            <AssetTable
+              assets={displayAssets}
+              isConnected={isConnected}
+              connectionType={connectionType}
+            />
+          )
+        }}
+      </ConnectionData>
+
     </div>
   )
 }

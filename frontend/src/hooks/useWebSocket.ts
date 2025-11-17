@@ -12,10 +12,16 @@ export function useWebSocket() {
   const [isConnected, setIsConnected] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>()
+  //exponential backoff delay
+  const [retryDelay, setRetryDelay] = useState(3000) 
 
   useEffect(() => {
+    let isUnmounted = false
     const connect = () => {
+      //prevent reconnect if unmounted
+      if (isUnmounted) return
       // Use the proxy URL or direct connection
+      
       const wsUrl = import.meta.env.DEV 
         ? 'ws://localhost:8000/ws' 
         : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
@@ -23,35 +29,45 @@ export function useWebSocket() {
       const ws = new WebSocket(wsUrl)
 
       ws.onopen = () => {
+      if (!isUnmounted) {
         setIsConnected(true)
+        // reset delay on success
+        setRetryDelay(3000)
         console.log('WebSocket connected')
       }
+    }
 
       ws.onmessage = (event) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data)
-          
-          if (message.type === 'initial' || message.type === 'update') {
-            setAssets(message.data)
-          }
-        } catch (error) {
-          console.error('Error parsing WebSocket message:', error)
+        if (!isUnmounted) {
+          try {
+            const message: WebSocketMessage = JSON.parse(event.data)
+            if (message.type === 'initial' || message.type === 'update') {
+              setAssets(message.data)
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error)
         }
+      }
       }
 
       ws.onerror = (error) => {
+        if (!isUnmounted) {
         console.error('WebSocket error:', error)
         setIsConnected(false)
       }
+      }
 
       ws.onclose = () => {
-        setIsConnected(false)
-        console.log('WebSocket disconnected, attempting reconnect...')
-        
-        // Reconnect after 3 seconds
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connect()
-        }, 3000)
+        if (!isUnmounted) {
+          setIsConnected(false)
+          console.log('WebSocket disconnected, attempting reconnect...')
+          
+          // exponential backoff for reconnection
+          reconnectTimeoutRef.current = setTimeout(() => {
+            setRetryDelay(Math.min(retryDelay * 2, 30000)) // max 30s
+            connect()
+          }, retryDelay)
+        }
       }
 
       wsRef.current = ws
@@ -60,14 +76,11 @@ export function useWebSocket() {
     connect()
 
     return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current)
-      }
-      if (wsRef.current) {
-        wsRef.current.close()
-      }
+      isUnmounted = true
+      if (reconnectTimeoutRef.current)  clearTimeout(reconnectTimeoutRef.current)
+      if (wsRef.current) wsRef.current.close()
     }
-  }, [])
+  }, [retryDelay])
 
   const sendMessage = (message: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -77,4 +90,3 @@ export function useWebSocket() {
 
   return { assets, isConnected, sendMessage }
 }
-
