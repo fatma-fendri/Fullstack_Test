@@ -1,15 +1,25 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 import asyncio
 import json
 import random
 from datetime import datetime
-from typing import List, Dict
-from pydantic import BaseModel
+from typing import List, Dict, Literal
+from pydantic import BaseModel, Field
 import uuid
+import logging
 
 app = FastAPI(title="Fullstack Dev Test API")
+
+logging.basicConfig(level=logging.INFO)
+
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logging.info(f"Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    logging.info(f"Response status: {response.status_code}")
+    return response
 
 # CORS middleware to allow frontend connections
 app.add_middleware(
@@ -24,7 +34,7 @@ app.add_middleware(
 # Data models
 class Asset(BaseModel):
     id: str
-    name: str
+    name: str = Field(..., min_length=3, max_length=50)
     type: str  # "glb" or "gltf"
     last_modified: str
 
@@ -126,6 +136,9 @@ async def root():
         "endpoints": {
             "GET /api/assets": "Get all assets",
             "GET /api/assets/{id}": "Get specific asset",
+            "POST /api/assets": "Create a new asset",
+            "PUT /api/assets/{id}": "Update an existing asset",
+            "DELETE /api/assets/{id}": "Delete an asset",
             "GET /api/assets/stream": "Server-Sent Events stream",
             "WS /ws": "WebSocket connection for real-time updates",
         },
@@ -201,6 +214,31 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         if websocket in websocket_connections:
             websocket_connections.remove(websocket)
+
+@app.post("/api/assets", response_model=Asset)
+async def create_asset(asset: Asset):
+    """Create a new asset."""
+    if asset.id in assets:
+        raise HTTPException(status_code=400, detail="Asset with this ID already exists")
+    assets[asset.id] = asset
+    return asset
+
+@app.put("/api/assets/{asset_id}", response_model=Asset)
+async def update_asset(asset_id: str, updated_asset: Asset):
+    """Update an existing asset."""
+    if asset_id not in assets:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    updated_asset.last_modified = datetime.now().isoformat()
+    assets[asset_id] = updated_asset
+    return updated_asset
+
+@app.delete("/api/assets/{asset_id}")
+async def delete_asset(asset_id: str):
+    """Delete an asset."""
+    if asset_id not in assets:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    del assets[asset_id]
+    return {"message": f"Asset {asset_id} deleted successfully"}
 
 
 if __name__ == "__main__":
