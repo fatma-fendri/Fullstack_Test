@@ -11,8 +11,11 @@ I started from the functional codebase provided and enhanced it with improvement
 ```
 fullstack_dev_task/ 
 ├── backend/ # Python FastAPI backend 
-│ ├── main.py # Main API server 
-│ └── requirements.txt 
+│   ├── __init__.py
+│   ├── main.py
+│   ├── requirements.txt
+│   └── tests/
+│       └── test_assets.py
 ├── frontend/ # React + TypeScript frontend 
 │ ├── src/ 
 │ │ ├── routes/ # TanStack Router routes (index, asset detail) 
