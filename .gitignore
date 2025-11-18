@@ -13,3 +13,6 @@ frontend/.tanstack/
 # === Logs and temporary files ===
 *.log
 *.tmp
+
+# === Other ===
+TEST_INSTRUCTIONS.md
