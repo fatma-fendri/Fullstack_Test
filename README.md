@@ -2,51 +2,56 @@
 
 ## Overview
 
-This is a fullstack development test designed for middle to senior level developers. The test evaluates your ability to work with real-time data, modern frontend frameworks, and backend API design.
+This repository contains my implementation of the fullstack development test provided by Kyrall.  
+The project demonstrates my ability to work with real-time data, modern frontend frameworks, and backend API design.
+
+I started from the functional codebase provided and enhanced it with improvements in real-time connectivity, error handling, user experience, and new features such as filtering, sorting, and an asset detail view.
 
 ## Project Structure
-
 ```
-fullstack_dev_task/
-├── backend/          # Python FastAPI backend
-│   ├── main.py       # Main API server
-│   └── requirements.txt
-├── frontend/         # React + TypeScript frontend
-│   ├── src/
-│   │   ├── routes/   # TanStack Router routes
-│   │   ├── hooks/    # Custom hooks (WebSocket, SSE)
-│   │   ├── components/
-│   │   └── api/      # API client
-│   └── package.json
+fullstack_dev_task/ 
+├── backend/ # Python FastAPI backend 
+│ ├── main.py # Main API server 
+│ └── requirements.txt 
+├── frontend/ # React + TypeScript frontend 
+│ ├── src/ 
+│ │ ├── routes/ # TanStack Router routes (index, asset detail) 
+│ │ ├── hooks/ # Custom hooks (WebSocket, SSE) 
+│ │ ├── components/ # AssetTable, ConnectionData, etc. 
+│ │ └── api/ # API client 
+│ └── package.json 
 └── README.md
 ```
 
-## Features
+## Features Implemented
 
 ### Backend (Python/FastAPI)
-- **Auto-updating Assets**: Multiple asset objects that automatically change their values every 10 seconds
-- **Asset Properties**:
-  - `id`: Unique identifier
-  - `name`: Randomly generated asset name (e.g., "Character_Mesh", "Building_Structure")
-  - `type`: Either "glb" or "gltf"
-  - `last_modified`: Timestamp that updates on each change
-- **Real-time Support**:
-  - **Server-Sent Events (SSE)**: `/api/assets/stream` endpoint for one-way real-time updates
-  - **WebSocket**: `/ws` endpoint for bidirectional real-time communication
+- **Auto-updating Assets**: Assets update every 10 seconds with new values.  
+- **Real-time Support**:  
+  - **Server-Sent Events (SSE)**: `/api/assets/stream` endpoint.  
+  - **WebSocket**: `/ws` endpoint for bidirectional communication.  
 
 ### Frontend (React + TypeScript)
-- **TanStack Router**: File-based routing system
-- **TanStack Query**: Server state management and data fetching
-- **Real-time Data Table**: Displays asset changes as they happen
-- **Connection Methods**: Toggle between WebSocket and SSE implementations
-- **Modern UI**: Beautiful, responsive design with connection status indicators
+- **TanStack Router**: File-based routing with a new dynamic route `/assets/$id` for asset detail view.  
+- **TanStack Query**: Initial data fetching before real-time updates take over.  
+- **Real-time Data Table**:  
+  - Toggle between WebSocket and SSE connections.  
+  - Row highlighting when assets update (visual feedback).  
+  - Filtering by type (GLB/GLTF).  
+  - Sorting by name or last modified date.  
+- **Asset Detail View**:  
+  - Clicking on an asset row navigates to `/assets/$id`.  
+  - Displays detailed information with live updates.  
+- **Error Handling**:  
+  - Clear connection status indicators (Connected, Reconnecting, Disconnected).  
+  - Exponential backoff for WebSocket reconnection attempts.  
 
 ## Getting Started
 
 ### Prerequisites
-- Python 3.8+
-- Node.js 18+
-- npm or yarn
+- Python 3.8+  
+- Node.js 18+  
+- npm or yarn  
 
 ### Backend Setup
 
@@ -112,9 +117,7 @@ The frontend will start on `http://localhost:5173`
 ### WebSocket
 - `WS /ws` - WebSocket connection for bidirectional real-time updates
 
-## Challenge Tasks
-
-As a candidate, you may be asked to:
+## Requirements 
 
 1. **Enhance Real-time Connectivity**
    - Improve error handling and reconnection logic
@@ -174,16 +177,6 @@ As a candidate, you may be asked to:
 - **Real-time Hooks**: Override query data with real-time updates
 - **Component Separation**: Clear separation of concerns (table, hooks, API)
 
-## Evaluation Criteria
-
-Candidates will be evaluated on:
-- **Code Quality**: Clean, maintainable, well-structured code
-- **Type Safety**: Proper TypeScript usage and type definitions
-- **Error Handling**: Robust error handling and edge cases
-- **Real-time Implementation**: Understanding of SSE vs WebSocket trade-offs
-- **Performance**: Efficient data handling and rendering
-- **Best Practices**: Following React and TypeScript best practices
-- **Testing**: Ability to write tests (optional, but recommended)
 
 ## Development Tips
 
@@ -210,10 +203,13 @@ Candidates will be evaluated on:
 - Check WebSocket proxy settings in `vite.config.ts`
 - Ensure firewall isn't blocking connections
 
+## Design Choices
+- Frontend Architecture: Modular components, hooks for real-time logic, TanStack Router for typed navigation.
+- Real-time Implementation: Encapsulated WebSocket and SSE in separate hooks for clarity and reusability.
+- User Experience: Clear connection indicators, smooth navigation, and visual feedback for updates.
+- Backend: FastAPI foundation kept lightweight, with compatibility fixes for Pydantic.
+
 ## License
 
-This is a test project for evaluation purposes.
+This project is submitted as part of the Kyrall fullstack developer assessment.
 
-## Questions?
-
-Feel free to ask questions during the test. Good communication is part of being a senior developer!
