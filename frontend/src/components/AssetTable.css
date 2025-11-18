@@ -126,21 +126,18 @@
   animation: fadeIn 0.3s ease-in;
 }
 
-/* Highlight effect for updated rows */
 .highlighted {
   background-color: #fff3b0; /* soft yellow highlight */
   transition: background-color 0.5s ease-in-out;
+  animation: fadeHighlight 3s ease forwards;
 }
 
-/* fade animation for smoother disappearance */
 @keyframes fadeHighlight {
   0% { background-color: #fff3b0; }
   100% { background-color: transparent; }
 }
 
-.highlighted {
-  animation: fadeHighlight 3s ease forwards;
-}
+
 
 @keyframes fadeIn {
   from {

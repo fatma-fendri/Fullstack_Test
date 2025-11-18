@@ -1,0 +1,20 @@
+.asset-detail {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.asset-detail h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  color: #1f2937;
+}
+
+.asset-detail p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #374151;
+}

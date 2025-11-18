@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { Asset } from '../types'
 import './AssetTable.css'
+import { Link } from '@tanstack/react-router'
 
 interface AssetTableProps {
   assets: Asset[]
@@ -169,7 +170,12 @@ export function AssetTable({ assets, isConnected, connectionType }: AssetTablePr
                     // Apply highlight class if asset was recently updated
                     className={`asset-row ${highlightedRows.includes(asset.id) ? 'highlighted' : ''}`}
                 >
-                  <td className="asset-id">{asset.id.substring(0, 8)}...</td>
+                  {/* Link to detail view */}
+                  <td className="asset-id">
+                    <Link to="/assets/$id" params={{ id: asset.id }}>
+                      {asset.id.substring(0, 8)}...
+                    </Link>
+                  </td>
                   <td className="asset-name">{asset.name}</td>
                   <td>
                     <span className={`type-badge ${getTypeBadgeClass(asset.type)}`}>
@@ -185,7 +191,7 @@ export function AssetTable({ assets, isConnected, connectionType }: AssetTablePr
       </div>
       {/* Footer */}
       <div className="table-footer">
-        <p>Total Assets: {assets.length}</p>
+        <p>Total Assets: {displayedAssets.length}</p>
         <p className="update-info">
           Assets update every 10 seconds automatically
         </p>
