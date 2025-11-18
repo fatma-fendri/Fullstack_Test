@@ -200,17 +200,59 @@ async def websocket_endpoint(websocket: WebSocket):
     }
     await websocket.send_json(initial_message)
 
+    last_ping_time = None  # Track timestamp of the last received ping
+    message_count = 0  # Count messages received from the client
+
+    def health_status(latency_ms: float | None, idle: bool) -> str:
+        """
+        Compute connection health based on latency and idle state.
+        - idle=True -> 'disconnected'
+        - latency None or 0 -> 'healthy' (first ping or unknown latency)
+        - latency < 200 ms -> 'healthy'
+        - latency >= 200 ms -> 'unstable'
+        """
+        if idle:
+            return "disconnected"
+        if latency_ms is None or latency_ms == 0:
+            return "healthy"
+        return "healthy" if latency_ms < 200 else "unstable"
+
     try:
         # Keep connection alive and listen for client messages
         while True:
             # Wait for any message from client (ping/pong or other)
             try:
-                data = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
+                msg = await asyncio.wait_for(websocket.receive_text(), timeout=1.0)
+                message_count += 1
+                if msg == "ping":
+                    now = datetime.now()  
+                    latency_ms = 0        
+                    if last_ping_time:
+                        # Calculate latency as time difference between current and previous ping
+                        latency_ms = (now - last_ping_time).total_seconds() * 1000  
+                    last_ping_time = now  
+                   # Send latency back to client in the pong response
+                    await websocket.send_json({
+                        "type": "pong",
+                        "latency_ms": latency_ms,
+                        "message_count": message_count, 
+                        "connection_health": health_status(latency_ms, idle=False)
+                    })
+                else:
+                    # Echo non-ping messages to confirm bidirectional communication.
+                    await websocket.send_json({
+                        "type": "echo",
+                        "message": msg,
+                        "message_count": message_count,
+                        "connection_health": "healthy"
+                    })
                 # Echo back or handle client message
-                await websocket.send_json({"type": "pong", "message": "received"})
             except asyncio.TimeoutError:
-                # Timeout is expected, just continue
-                pass
+               await websocket.send_json({
+                    "type": "health",
+                    "connection_health": health_status(None, idle=True)
+                })
+            
     except WebSocketDisconnect:
         if websocket in websocket_connections:
             websocket_connections.remove(websocket)
