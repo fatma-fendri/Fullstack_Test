@@ -13,8 +13,8 @@ fullstack_dev_task/
 ├── backend/ # Python FastAPI backend 
 │   ├── __init__.py
 │   ├── main.py
-│   ├── requirements.txt
-│   └── tests/
+│   ├── requirements.txt  # Backend dependencies
+│   └── tests/            # Pytest integration tests
 │       └── test_assets.py
 ├── frontend/ # React + TypeScript frontend 
 │ ├── src/ 
