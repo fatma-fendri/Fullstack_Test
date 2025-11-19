@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains my implementation of the fullstack development test provided by Kyrall.  
+This repository contains my implementation of a fullstack development test.  
 The project demonstrates my ability to work with real-time data, modern frontend frameworks, and backend API design.
 
 I started from the functional codebase provided and enhanced it with improvements in real-time connectivity, error handling, user experience, and new features such as filtering, sorting, and an asset detail view.
