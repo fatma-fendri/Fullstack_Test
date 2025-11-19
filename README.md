@@ -80,12 +80,12 @@ python main.py
 # Or with uvicorn directly:
 uvicorn main:app --reload --port 8000
 ```
+The backend will start on `http://localhost:8000`
 
-5. Run the tests
+To run the tests : 
 ```bash
 python -m pytest -v tests
 ```
-The backend will start on `http://localhost:8000`
 
 ### Frontend Setup
 
