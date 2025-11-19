@@ -120,36 +120,6 @@ The frontend will start on `http://localhost:5173`
 ### WebSocket
 - `WS /ws` - WebSocket connection for bidirectional real-time updates
 
-## Requirements 
-
-1. **Enhance Real-time Connectivity**
-   - Improve error handling and reconnection logic
-   - Add connection quality indicators
-   - Implement message queuing for offline scenarios
-
-2. **Optimize Performance**
-   - Implement data diffing to reduce unnecessary re-renders
-   - Add row-level change highlighting
-   - Optimize TanStack Query cache strategy
-
-3. **Add Features**
-   - Filtering and sorting capabilities
-   - Asset detail view with real-time updates
-   - Bulk operations on assets
-   - Export functionality
-
-4. **Improve User Experience**
-   - Loading states and skeletons
-   - Error boundaries and error recovery
-   - Toast notifications for connection status changes
-   - Keyboard navigation
-
-5. **Backend Enhancements**
-   - Add pagination support
-   - Implement asset creation/update/deletion endpoints
-   - Add database persistence (replace in-memory storage)
-   - Add authentication and authorization
-
 ## Technical Stack
 
 ### Backend
@@ -214,5 +184,5 @@ The frontend will start on `http://localhost:5173`
 
 ## License
 
-This project is submitted as part of the Kyrall fullstack developer assessment.
+This project is submitted as part of a fullstack developer assessment.
 
