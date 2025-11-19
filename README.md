@@ -5,7 +5,7 @@
 This repository contains my implementation of a fullstack development test.  
 The project demonstrates my ability to work with real-time data, modern frontend frameworks, and backend API design.
 
-I started from the functional codebase provided and enhanced it with improvements in real-time connectivity, error handling, user experience, and new features such as filtering, sorting, and an asset detail view.
+I started from the functional codebase provided and enhanced it with significant improvements across both frontend and backend. On the frontend, I optimized real‑time hook usage by conditionally activating WebSocket or SSE to reduce resource consumption, added visual feedback for asset updates with row highlighting and animations, improved error handling with clearer messages and exponential backoff, introduced filtering and sorting by type, name, or last modified date, built an asset detail view with live updates using TanStack Router, and implemented a connection quality indicator showing latency, message frequency, and health metrics. On the backend, I added REST endpoints for asset creation, updating, and deletion, enforced validation with Pydantic models, integrated request logging, and developed integration tests to ensure API reliability.
 
 ## Project Structure
 ```
